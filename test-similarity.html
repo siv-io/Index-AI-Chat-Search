@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xenova Similarity Test</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      background: white;
+      border: 4px solid black;
+      padding: 30px;
+      box-shadow: 8px 8px 0px #000000;
+    }
+
+    h1 {
+      text-align: center;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 30px;
+    }
+
+    .input-section {
+      margin-bottom: 30px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 15px;
+      font-size: 16px;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      border: 2px solid black;
+      background: white;
+      box-shadow: 4px 4px 0px #000000;
+      margin-bottom: 15px;
+    }
+
+    button {
+      background: #ff0000;
+      color: white;
+      border: 2px solid black;
+      padding: 15px 30px;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      font-size: 16px;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 4px 4px 0px #000000;
+      transition: all 0.1s ease;
+    }
+
+    button:hover {
+      transform: translate(1px, 1px);
+      box-shadow: 3px 3px 0px #000000;
+    }
+
+    button:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 4px 4px 0px #000000;
+    }
+
+    .status {
+      padding: 10px;
+      margin: 15px 0;
+      border: 2px solid black;
+      font-weight: bold;
+    }
+
+    .status.loading {
+      background: #ffffcc;
+    }
+
+    .status.success {
+      background: #ccffcc;
+    }
+
+    .status.error {
+      background: #ffcccc;
+    }
+
+    .results {
+      margin-top: 30px;
+    }
+
+    .result-item {
+      background: #f0f0f0;
+      border: 2px solid black;
+      padding: 15px;
+      margin-bottom: 10px;
+      box-shadow: 3px 3px 0px #000000;
+    }
+
+    .similarity-score {
+      background: #ff0000;
+      color: white;
+      padding: 5px 10px;
+      font-weight: bold;
+      display: inline-block;
+      margin-bottom: 10px;
+      border: 1px solid black;
+    }
+
+    .text-content {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .sample-texts {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e0e0e0;
+      border: 2px solid black;
+    }
+
+    .sample-texts h3 {
+      margin-top: 0;
+      text-transform: uppercase;
+    }
+
+    .sample-texts ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sample-texts li {
+      padding: 5px 0;
+      border-bottom: 1px solid #ccc;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>[ Xenova Similarity Test ]</h1>
+
+    <div class="input-section">
+      <input type="text" id="queryInput" placeholder="Enter your search query here..." />
+      <button id="searchBtn">[ Search ]</button>
+    </div>
+
+    <div id="status" class="status" style="display: none;"></div>
+
+    <div id="results" class="results"></div>
+
+    <div class="sample-texts">
+      <h3>[ Sample Texts ]</h3>
+      <ul id="sampleTextsList"></ul>
+    </div>
+  </div>
+
+  <script type="module">
+    import { pipeline, env } from './node_modules/@huggingface/transformers/dist/transformers.min.js';
+    env.backends.onnx.wasm.wasmPaths = "";
+    // Configure to use local ORT WASM file for better performance
+    // window.env = window.env || {};
+    // window.env.ORT_WASM = './ort-wasm-simd-threaded.jsep.mjs';
+
+    // Sample texts for testing
+    // const sampleTexts = [
+    //   "How to create a React component with hooks",
+    //   "JavaScript async await best practices",
+    //   "Python list comprehension examples",
+    //   "CSS flexbox layout tutorial",
+    //   "Node.js express server setup",
+    //   "Machine learning with TensorFlow",
+    //   "Database optimization techniques",
+    //   "Git workflow for team collaboration",
+    //   "Docker containerization guide",
+    //   "API design REST principles",
+    //   "Web security best practices",
+    //   "React state management with Redux",
+    //   "JavaScript promises and error handling",
+    //   "Python pandas data analysis",
+    //   "CSS grid responsive design",
+    //   "MongoDB query optimization",
+    //   "AWS cloud deployment strategies",
+    //   "TypeScript type definitions",
+    //   "Vue.js component lifecycle",
+    //   "GraphQL query optimization",
+    //   "Linux command line basics",
+    //   "Angular dependency injection",
+    //   "Java Spring Boot configuration",
+    //   "Kubernetes pod management",
+    //   "Redis caching strategies",
+    //   "Elasticsearch search queries",
+    //   "Microservices architecture patterns",
+    //   "CI/CD pipeline automation",
+    //   "Test driven development practices",
+    //   "Code review best practices",
+    //   "who killed charlie kirk, what was his motive behind it?"
+    // ];
+    const sampleTexts = [
+      "Booklets in browser bookmarks, commonly known as \"bookmarklets,\" are bookmarks that contain JavaScript code instead of a regular URL. When clicked, bookmarklets run their JavaScript code on the current page the user is viewing in the browser. This allows them to modify the appearance, extract data, automate actions, or interact with the page dynamically without loading a new website.\n\nIn essence, bookmarklets do indeed run JavaScript in the context of the current webpage, enabling various enhancements or utilities directly within the browser tab without needing to install extensions or separate software. They are stored in bookmarks like usual but have URLs starting with \"javascript:\" followed by the script to execute.\n\nCommon use cases for bookmarklets include:\n- Modifying page layout or style (e.g., changing fonts or colors)\n- Extracting information from the page content\n- Automating clicks or form submissions\n- Removing unwanted elements like ads\n- Performing searches or opening related information based on page content\n\nBookmarklets are supported by all major browsers and are a convenient way to add custom functionality to web browsing with one click.[1][3][4][5]",
+      "To create a Chrome bookmarklet, follow these steps:\n\n1. Make sure the bookmarks bar is visible in Chrome by clicking the three dots in the top right corner, then hovering over \"Bookmarks,\" and selecting \"Show bookmarks bar.\"\n\n2. Right-click the bookmarks bar and choose \"Add page\" (or \"Add bookmark\").\n\n3. In the dialog that appears, enter a name for your bookmarklet in the \"Name\" field.\n\n4. In the \"URL\" field, enter the JavaScript code you want to run, prefixed by `javascript:`. For example:\n   ```\n   javascript:(function() { alert('Hello, bookmarklet!'); })();\n   ```\n\n5. Click \"Save\" to create the bookmarklet, which will appear on your bookmarks bar.\n\nUsing the bookmarklet is simple: just visit a webpage and click the bookmarklet on your bookmarks bar to run the JavaScript code on that page.\n\nThis process allows you to create handy scripts that execute within the context of any webpage, enabling various custom actions or tools directly from your bookmarks bar.[1][2][3][4]",
+      "who killed charlie kirk, what was his motive behind it?",
+      "Here is a direct comparison between \"Hello World\" in Rust and JavaScript, showing typical syntax and characteristics for both languages.\n\n### Code Examples\n\nRust:\n```rust\nfn main() {\n    println!(\"Hello, world!\");\n}\n```\n\nJavaScript:\n```javascript\nconsole.log(\"Hello, world!\");\n```\n\n\n### Comparison Table\n\n| Feature               | Rust Example                      | JavaScript Example                  |\n|-----------------------|-----------------------------------|-------------------------------------|\n| File Extension        | `.rs`                             | `.js`                               |\n| Entry Point           | `fn main()`                       | Script runs from top-down           |\n| Print Function        | `println!`                        | `console.log`                       |\n| Semicolon Required    | Yes                               | Yes                                 |\n| Compilation Needed    | Yes (compile to binary)           | No (interpreted in browser/Node.js) |\n| Typical Use Context   | Systems programming, CLI, backend | Web, scripts, servers               |\n\n### Key Differences\n\n- Rust code must be compiled before running, and enforces types and memory safety at compile time.[6]\n- JavaScript can run directly in browsers or Node.js, typically used for web and scripting tasks.[1][4]\n- The main function is mandatory in Rust as the program entry point, while JavaScript scripts execute top-down by default.[6]\n\nBoth versions output \"Hello, world!\" but their environments and syntax follow the conventions of each language.[1][6]",
+      "The Xenova all-MiniLM-L6 (often found as all-MiniLM-L6-v2) can be tried directly in-browser using the Transformers.js package and demos powered by Xenova. These demos allow generating embeddings and running semantic search tasks offline—no server or API key needed.[1][2][3]\n\n### Interactive Demos and Playgrounds\n\n- Developers regularly demonstrate usage with simple JavaScript HTML files, showing how text is embedded and compared live in the browser.[2][1]\n- The Transformers.js package has sample pipelines (feature extraction) using Xenova’s all-MiniLM-L6-v2; you can install `@xenova/transformers` and use the example code on your own local machine in React or plain JS.[4][2]\n- Some benchmarking demos are live via recent WebGPU integrations, and contributors post public links for testing new features such as online embedding benchmarks.[5]\n\n### Getting Started\n\n- For React or plain JS projects, you can use `@xenova/transformers` to run the model locally; code samples are widely available showing how to generate embeddings and measure similarity.[3][2][4]\n- Some educational blogs and tutorials provide step-by-step guides to set up the model for vector search and semantic tasks directly in the browser environment.[6][1]\n\n### API-Based Trials\n\n- If you prefer an API, DeepInfra provides a demo and API playground for sentence-transformers/all-MiniLM-L6-v2.[7][8]\n\n### Playground and Demo Links\n\n- Transformers.js demos: Run in-browser embedding and semantic search[1][5]\n- DeepInfra playground: API-based sentence transformation online[7]\n- HuggingFace model page: Try downloadable or hosted inference for embeddings[9][10]\n\nIn summary, the fastest way to try Xenova all-MiniLM-L6 is by using in-browser demos with Transformers.js or visiting platforms like DeepInfra for online API demos.[2][3][5][1][7]",
+      "How to create chrome bookmarklets?",
+      "what are booklets in browser bookmarks - do they run js on current page?",
+      "can you write hello world in rust and compare it with js",
+      "can you link to websites where i could try the xenova all mini l6 text embedding model for contextual search?",
+      "Here are websites where you can try or explore the Xenova all-MiniLM-L6 text embedding model for contextual search:\n\n1. A detailed demo and explanation of a fully client-side embedding generator and vector search interface using Xenova's all-MiniLM-L6-v2 model is available on Emmanuel Eric Bravo's site. It runs entirely in-browser with no API keys or servers, ideal for offline privacy-preserving semantic search. This page shows the model running with JS and WebAssembly:\nhttps://www.emmanuelericbravo.com/AI/vector-search/[1]\n\n2. The official Hugging Face page for Xenova/all-MiniLM-L6-v2 offers the model with usage examples, including using the Transformers.js JavaScript library to compute embeddings directly in the browser or Node.js:\nhttps://huggingface.co/Xenova/all-MiniLM-L6-v2[6]\n\n3. The Hugging Face sentence-transformers page for all-MiniLM-L6-v2 shows usage examples in Python for semantic search contexts:\nhttps://huggingface.co/sentence-transformers/all-MiniLM-L6-v2[5]\n\nThese resources provide runnable demos or code for embedding generation and contextual search with the MiniLM L6 model, including fully browser-based implementations. No signup or API keys needed for the browser-based demos, allowing you to try it live.\n\nIf more specific interactive web apps come up, I can help locate them too.",
+      "where can i try the xenova all mini l6",
+      "Charlie Kirk was killed by Tyler James Robinson, a 22-year-old man. The motive behind the killing appears to revolve around Robinson's claimed hatred toward Kirk, particularly citing that he was \"fed up with his hatred.\" Text messages and a note left by Robinson indicate that he considered Kirk's anti-trans and hateful rhetoric as the reason for the killing. Robinson reportedly told his partner/roommate, who is a biological male undergoing gender transition, that he killed Kirk because he was \"tired of his hatred\" and felt some hate \"can't be negotiated out.\" Prosecutors indicated that Robinson had become more politically left-leaning in recent times, adopting pro-gay and pro-trans rights views. The shooting was premeditated, with Robinson planning for over a week and shooting Kirk from a rooftop using a bolt-action rifle. Utah prosecutors have charged Robinson with murder and plan to seek the death penalty.\n\nWhile some political figures quickly framed the killing within a left-right political confrontation, investigations show Robinson's motive was more related to being opposed to what he perceived as Kirk's hateful views rather than clear-cut partisan ideology. There remains ambiguity about Robinson's full political stance beyond his opposition to Kirk's messaging and hatred.[1][2][3][4][5][6][7][8]"
+    ]
+    let extractor = null;
+    let embeddings = null;
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function () {
+      populateSampleTexts();
+      initializeModel();
+
+      // Allow Enter key to trigger search
+      document.getElementById('queryInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+          performSearch();
+        }
+      });
+
+      // Button click event
+      document.getElementById('searchBtn').addEventListener('click', performSearch);
+    });
+
+    function populateSampleTexts() {
+      const list = document.getElementById('sampleTextsList');
+      sampleTexts.forEach((text, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${index + 1}. ${text}`;
+        list.appendChild(li);
+      });
+    }
+
+    async function initializeModel() {
+      showStatus('Initializing Xenova model...', 'loading');
+
+      try {
+        extractor = await pipeline(
+          'feature-extraction',
+          'Xenova/all-MiniLM-L6-v2',
+          {
+            progress_callback: (progress) => {
+              if (progress.status === 'downloading') {
+                showStatus(`Downloading model: ${Math.round(progress.progress * 100)}%`, 'loading');
+              }
+            }
+          }
+        );
+
+        showStatus('Model loaded! Generating embeddings for sample texts...', 'loading');
+        await generateEmbeddings();
+        showStatus('Ready! Enter a query to search.', 'success');
+
+      } catch (error) {
+        showStatus(`Error: ${error.message}`, 'error');
+        console.error('Model initialization error:', error);
+      }
+    }
+
+    async function generateEmbeddings() {
+      const embeddingsArray = [];
+
+      for (let i = 0; i < sampleTexts.length; i++) {
+        const text = sampleTexts[i];
+
+        try {
+          const result = await extractor(text, {
+            pooling: 'mean',
+            normalize: true
+          });
+
+          embeddingsArray.push({
+            text: text,
+            embedding: Array.from(result.data),
+            index: i
+          });
+
+          if ((i + 1) % 5 === 0) {
+            showStatus(`Generating embeddings: ${i + 1}/${sampleTexts.length}`, 'loading');
+          }
+
+        } catch (error) {
+          console.error(`Error processing text ${i}:`, error);
+        }
+      }
+
+      embeddings = embeddingsArray;
+      console.log(`Generated ${embeddings.length} embeddings`);
+    }
+
+    async function performSearch() {
+      const query = document.getElementById('queryInput').value.trim();
+
+      if (!query) {
+        showStatus('Please enter a search query', 'error');
+        return;
+      }
+
+      if (!extractor || !embeddings) {
+        showStatus('Model not ready yet', 'error');
+        return;
+      }
+
+      const searchBtn = document.getElementById('searchBtn');
+      searchBtn.disabled = true;
+      showStatus('Searching...', 'loading');
+
+      try {
+        // Generate query embedding
+        const queryResult = await extractor(query, {
+          pooling: 'mean',
+          normalize: true
+        });
+
+        const queryEmbedding = Array.from(queryResult.data);
+        console.log('Query embedding magnitude:', getMagnitude(queryEmbedding));
+
+        // Calculate similarities
+        const results = [];
+
+        for (let i = 0; i < embeddings.length; i++) {
+          const item = embeddings[i];
+          const similarity = dotProductSimilarity(queryEmbedding, item.embedding);
+
+          results.push({
+            text: item.text,
+            similarity: similarity,
+            index: item.index
+          });
+        }
+
+        // Sort by similarity (highest first)
+        results.sort((a, b) => b.similarity - a.similarity);
+
+        // Show top 10 results
+        displayResults(results.slice(0, 10));
+        showStatus(`Found ${results.length} results`, 'success');
+
+      } catch (error) {
+        showStatus(`Search error: ${error.message}`, 'error');
+        console.error('Search error:', error);
+      } finally {
+        searchBtn.disabled = false;
+      }
+    }
+
+    function dotProductSimilarity(a, b) {
+      if (a.length !== b.length) {
+        throw new Error('Vectors must have the same length');
+      }
+
+      let dotProduct = 0;
+      for (let i = 0; i < a.length; i++) {
+        dotProduct += a[i] * b[i];
+      }
+      return dotProduct;
+    }
+
+    function getMagnitude(vector) {
+      let sum = 0;
+      for (let i = 0; i < vector.length; i++) {
+        sum += vector[i] * vector[i];
+      }
+      return Math.sqrt(sum);
+    }
+
+    function displayResults(results) {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+
+      if (results.length === 0) {
+        resultsDiv.innerHTML = '<p>No results found.</p>';
+        return;
+      }
+
+      results.forEach((result, index) => {
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'result-item';
+
+        resultDiv.innerHTML = `
+                    <div class="similarity-score">
+                        Similarity: ${(result.similarity * 100).toFixed(2)}%
+                    </div>
+                    <div class="text-content">
+                        ${result.text}
+                    </div>
+                `;
+
+        resultsDiv.appendChild(resultDiv);
+      });
+    }
+
+    function showStatus(message, type) {
+      const statusDiv = document.getElementById('status');
+      statusDiv.textContent = message;
+      statusDiv.className = `status ${type}`;
+      statusDiv.style.display = 'block';
+    }
+
+    // Make performSearch globally available
+    window.performSearch = performSearch;
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "name in manifest.json",
+  "description": "description in manifest.json",
+  "action": {
+    "default_popup": "src/pages/popup/index.html",
+    "default_icon": {
+      "32": "icon-32.png"
+    }
+  },
+  "icons": {
+    "128": "icon-128.png"
+  },
+  "permissions": ["storage", "unlimitedStorage", "tabs", "alarms"],
+  "content_scripts": [
+    {
+      "matches": ["*://claude.ai/*"],
+      "js": ["src/pages/content/claude.ts"]
+    },
+    {
+      "matches": ["*://www.perplexity.ai/*"],
+      "js": ["src/pages/content/perplexity.ts"]
+    },
+    {
+      "matches": [
+        "*://chatgpt.com/*",
+        "*://chatgpt.com/*",
+        "*://chat.com/*",
+        "*://chat.openai.com/*"
+      ],
+      "js": ["src/pages/content/chatgpt.ts"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["contentStyle.css", "icon-128.png", "icon-32.png"],
+      "matches": []
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  }
+}

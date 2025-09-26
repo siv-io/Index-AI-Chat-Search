@@ -270,10 +270,10 @@
     "@babel/helper-string-parser" "^7.27.1"
     "@babel/helper-validator-identifier" "^7.27.1"
 
-"@crxjs/vite-plugin@^2.0.3":
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/@crxjs/vite-plugin/-/vite-plugin-2.0.3.tgz#8eb7940a030a6cb82a40c2c5dfafc2df408c75e6"
-  integrity sha512-OfAzERiwBlLg7u/+aRExJVYlxx95IaYOSEMJpMzXcKqWPNBMlA1ppwC2nelHTIvF5LWxn5CEp6zqlHjLH9QGtg==
+"@crxjs/vite-plugin@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@crxjs/vite-plugin/-/vite-plugin-2.2.0.tgz#6e9a08cc1969cff42b049180d576440eec643995"
+  integrity sha512-HpT1GLbUQy42nlpN4sGzFgulacBraMM778s8Q+oPo4cb26DwO9tTwdndlvAS8fe6vEProFXvbdt37objp/0IQA==
   dependencies:
     "@rollup/pluginutils" "^4.1.2"
     "@webcomponents/custom-elements" "^1.5.0"

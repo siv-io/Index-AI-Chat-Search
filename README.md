@@ -1,7 +1,7 @@
 # Searcch
 
 <div align="center">
-  <img src="https://github.com/siv-io/Index-AI-Chat-Search/public/thumbnail.jpe" alt="Prompt Search Extension UI" width="400" />
+  <img src="https://github.com/siv-io/Index-AI-Chat-Search/public/thumbnail.jpeg" alt="Prompt Search Extension UI" width="400" />
 
 </div>
 

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "name in manifest.json",
-  "description": "description in manifest.json",
+  "name": "Index",
+  "description": "AI Chat Search with Context",
   "action": {
     "default_popup": "src/pages/popup/index.html",
     "default_icon": {

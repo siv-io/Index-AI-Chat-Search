@@ -182,7 +182,7 @@ This project is licensed under the [Creative Commons Attribution-NonCommercial-S
 
 This project uses code and inspiration from the following open-source projects:
 
-- **[chatgpt-exporter](https://github.com/pionxzh/chatgpt-exporter)** - Used this repository to understand how to fetch ChatGPT conversations and implement the data extraction logic for ChatGPT chats.
+- **[chatgpt-exporter](https://github.com/pionxzh/chatgpt-exporter)**
 
 ## Support
 

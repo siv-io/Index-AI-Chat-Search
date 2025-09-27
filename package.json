@@ -1,6 +1,6 @@
 {
   "name": "Contextual_AI_Search",
-  "version": "1.4.0",
+  "version": "1.0.0",
   "description": "A 100% local AI chat search extension with context",
   "license": "MIT",
   "scripts": {

@@ -5,7 +5,8 @@
 
 ## Index — Search AI chats with context
 
-## Table of Contents
+<details>
+  <summary><strong>Table of Contents</strong></summary>
 
 - [Features](#features)
 - [Installation](#installation)
@@ -15,13 +16,15 @@
   - [Embedding Generation](#embedding-generation)
   - [Search Process](#search-process)
   - [How do I know my data is safe](#how-do-i-know-my-data-is-safe)
-- [Usage](#usage)
+- [How to use](#how-to-use)
 - [Development](#development)
 - [Known Issues](#known-issues)
 - [Contributing](#contributing)
 - [Privacy & Security](#privacy--security)
 - [Attribution](#attribution)
 - [Support](#support)
+
+</details>
 
 ## Features
 
@@ -103,12 +106,20 @@ All conversation data and embeddings are stored locally in **IndexedDB**. To ins
 4. Navigate to "IndexedDB" in the left sidebar
 5. Expand the extension's database to view stored conversations and embeddings
 
-## Usage
+## How to use
 
-1. **Initial Setup**: After installation, the extension will automatically start collecting your conversations
-2. **Wait for Processing**: Allow the extension to fetch and process your data (progress is shown in the popup)
+1. **Initial Setup**: Once you install the extension it'll start collecting  
+   chats every time you visit chatgpt, claude or perplexity  
+   you need to be logged in to save your conversation and find them later
+
+2. **Wait for Processing**: On your first visit to support AI sites it'll save all the previous conversations,  
+   turn them into vector embeddings and save them in IndexDB  
+   **this takes around 25-50 mins per site depending on your chat history**
+
 3. **Search**: Click the extension icon and enter your search query
+
 4. **Filter Results**: Use the filter buttons to narrow down results by platform or date range
+
 5. **View Details**: Click on any result to open the original conversation
 
 ## Development

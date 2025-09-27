@@ -1,11 +1,9 @@
-# Searcch
-
 <div align="center">
-  <img src="public/thumbnail.jpeg" alt="Prompt Search Extension UI" width="400" />
+  <img src="public/thumbnail.jpeg" alt="Prompt Search Extension UI" width="800" />
 
 </div>
 
-## Search your AI chats with context
+## Index — Search AI chats with context
 
 ## Table of Contents
 

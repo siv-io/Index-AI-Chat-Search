@@ -1,7 +1,7 @@
 # Searcch
 
 <div align="center">
-  <img src="https://github.com/siv-io/Index-AI-Chat-Search/assets/thumbnail.png" alt="Prompt Search Extension UI" width="400" />
+  <img src="https://github.com/siv-io/Index-AI-Chat-Search/public/thumbnail.jpe" alt="Prompt Search Extension UI" width="400" />
 
 </div>
 
@@ -27,8 +27,8 @@
 
 ## Features
 
+- 🔍 **Semantic Search**: Search through your chats with context and meaning
 - 🔏 **Privacy First**: Your data never leaves your computer ([How it works](#how-it-works))
-- 🔍 **Semantic Search**: Search through your conversations using context
 - 🤖 **Multi-Platform Support**: Works with ChatGPT, Claude, and Perplexity
 - ⚡ **Fast & Efficient**: Local processing with vector embeddings
 - 🔄 **Auto-Sync**: Automatically processes new conversations

@@ -38,11 +38,12 @@
 
 ### Option 1: Download Pre-built Extension (Recommended)
 
-1. Download the latest `.crx` file from the [Releases](https://github.com/siv-io/Index-AI-Chat-Search/releases/) page
-2. Open Chrome and navigate to `chrome://extensions/`
-3. Enable "Developer mode" in the top right corner
-4. Drag and drop the downloaded `.crx` file into the extensions page
-5. Click "Add extension" when prompted
+1. Download the latest `.zip` file from the [Releases](https://github.com/siv-io/Index-AI-Chat-Search/releases/) page
+2. Extract the downloaded `.zip` file to a folder on your computer
+3. Open Chrome and navigate to `chrome://extensions/`
+4. Enable "Developer mode" in the top right corner
+5. Click "Load unpacked" and select the extracted folder
+6. Click "Add extension" when prompted
 
 ### Option 2: Build from Source
 

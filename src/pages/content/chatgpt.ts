@@ -419,33 +419,30 @@ async function fetchAndUpdateNewConversations(): Promise<void> {
   try {
     console.log("Starting to fetch and update new conversations...");
 
-    // Get stored data
-    const data = await chrome.storage.local.get(["chatgpt"]);
-    if (!data.chatgpt) {
+    const { chatgpt } = await chrome.storage.local.get(["chatgpt"]);
+
+    if (!chatgpt) {
       console.log("No stored ChatGPT data found. Running init()");
-      init();
+      await init();
       return;
     }
 
-    const storedConversations = data.chatgpt.conversations || [];
-    const storedConversationDetails = data.chatgpt.chatDetails || [];
+    const storedConversations = chatgpt.conversations ?? [];
+    const storedConversationDetails = chatgpt.chatDetails ?? [];
 
-    // Check if we have any stored conversations
     if (storedConversations.length === 0) {
-      console.log("No stored conversations found. Run init() first.");
+      console.log("No stored conversations found. Running init()");
       await init();
     }
 
-    // Get the most recent stored conversation ID to find where new conversations start
-    const mostRecentStoredId = storedConversations[0].id;
+    const mostRecentStoredId = storedConversations[0]?.id;
     console.log(
-      `Looking for new conversations after stored conversation: ${mostRecentStoredId}`
+      `Looking for new conversations after: ${mostRecentStoredId}`
     );
 
-    const conversationsToFetch = await fetchChatsTillMatch(mostRecentStoredId);
+    const newConversations = await fetchChatsTillMatch(mostRecentStoredId);
 
-    // Check if we found any new conversations
-    if (conversationsToFetch.length === 0) {
+    if (newConversations.length === 0) {
       console.log(
         "✅ No new conversations found. All conversations are up to date."
       );
@@ -453,60 +450,68 @@ async function fetchAndUpdateNewConversations(): Promise<void> {
     }
 
     console.log(
-      `Found ${conversationsToFetch.length} new conversations to fetch details for:`
+      `Found ${newConversations.length} new conversation(s):`
     );
-    conversationsToFetch.forEach((conv) =>
-      console.log(`- ${conv.id}: ${conv.title}`)
+    newConversations.forEach(({ id, title }) =>
+      console.log(`- ${id}: ${title}`)
     );
 
-    // Fetch details for all new conversations
-    const newConversationDetails: ApiConversationWithId[] = [];
-    for (let i = 0; i < conversationsToFetch.length; i++) {
-      const conversation = conversationsToFetch[i];
-      try {
+    console.log("Fetching conversation details...");
+
+    const detailResults = await Promise.allSettled(
+      newConversations.map(async (conversation, index) => {
         console.log(
-          `Fetching details for new conversation ${i + 1}/${
-            conversationsToFetch.length
-          }: ${conversation.id}`
+          `Fetching ${index + 1}/${newConversations.length}: ${conversation.id}`
         );
-        const conversationDetails = await fetchChatDetails(conversation.id);
-        newConversationDetails.push(conversationDetails);
-      } catch (error) {
+
+        return fetchChatDetails(conversation.id);
+      })
+    );
+
+    const newConversationDetails: ApiConversationWithId[] = [];
+
+    detailResults.forEach((result, index) => {
+      if (result.status === "fulfilled") {
+        newConversationDetails.push(result.value);
+      } else {
         console.error(
-          `Error fetching details for conversation ${conversation.id}:`,
-          error
+          `Error fetching details for conversation ${newConversations[index].id}:`,
+          result.reason
         );
-        // Continue with other conversations even if one fails
       }
-    }
+    });
 
     console.log(
-      `Successfully fetched details for ${newConversationDetails.length} new conversations`
+      `Successfully fetched ${newConversationDetails.length} conversation detail(s)`
     );
 
-    // Update Chrome storage with new conversations
-    console.log("Updating Chrome storage with new conversations...");
-    const updatedData = {
-      ...data.chatgpt,
-      conversations: [...conversationsToFetch, ...storedConversations],
+    const updatedChatGPTData = {
+      ...chatgpt,
+      conversations: [...newConversations, ...storedConversations],
       chatDetails: [...newConversationDetails, ...storedConversationDetails],
       lastUpdated: Date.now(),
       totalConversations:
-        storedConversations.length + conversationsToFetch.length,
+        storedConversations.length + newConversations.length,
       totalDetails:
         storedConversationDetails.length + newConversationDetails.length,
     };
 
-    await chrome.storage.local.set({ chatgpt: updatedData });
+    console.log("Updating Chrome storage...");
 
-    console.log("✅ Successfully updated ChatGPT data with new conversations!");
+    await chrome.storage.local.set({
+      chatgpt: updatedChatGPTData,
+    });
+
+    console.log("✅ Successfully updated ChatGPT data.");
     console.log(
-      `Added ${conversationsToFetch.length} new conversations and ${newConversationDetails.length} conversation details`
+      `Added ${newConversations.length} conversation(s) and ${newConversationDetails.length} detail(s).`
     );
   } catch (error) {
-    console.error("❌ Error during fetch and update new conversations:", error);
+    console.error(
+      "❌ Error during fetch and update new conversations:",
+      error
+    );
     throw error;
   }
 }
-
 fetchAndUpdateNewConversations().catch(console.error);
